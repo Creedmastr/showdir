@@ -14,6 +14,9 @@ fn main() {
     println!("{}", dir_name);
 
     let listed_dir = list_dir(dir_name, &args);
-    terminal::clear(); // Clear the terminal to make it easier to read
+    if !args.len() >= 3 && args[2] != "false" {
+        terminal::clear(); // Clear the terminal to make it easier to read
+    }
+
     println!("{}", listed_dir);
 }
