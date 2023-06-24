@@ -1,27 +1,38 @@
-use std::path::Path;
+fn ignore_element(ce: &str, args: &Vec<String>) -> bool {
+    if args.contains(&ce.to_string()) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
-pub fn list_dir(dir_name: &String) -> String {
+pub fn list_dir(dir_name: &String, args: &Vec<String>) -> String {
     let mut result = String::new();
 
     for path in std::fs::read_dir(dir_name).unwrap() {
         let name = path.as_ref().unwrap().file_name();
+        let name = name.to_str().unwrap();
+
+        if ignore_element(name, args) {
+            continue;
+        };
 
         if path.as_ref().unwrap().path().is_dir() {
-            let mut fname = dir_name.to_string();
-            fname.push_str("/");
-            fname.push_str(&name.to_str().unwrap());
-            fname.push_str("/");
+            let fname = dir_name.to_string() + "/" + name + "/";
 
-            if name == "./.git/" {
+            // Ignores the git dir as it is, in most cases, not to be seen by the user
+            if name == "./.git/" { 
                 continue;
             }
+            
+            // Lists the sub-dir (current element)
+            let listed_subdir = list_dir(&fname, args);
 
-            let listed_subdir = list_dir(&fname);
-
-            result.push_str("  ");
-            result.push_str(&listed_subdir);
+            // Add the space to show that we're in a subdir
+            result += "  ";
+            result += &listed_subdir;
         } else {
-            result.push_str(&format!("  ↳  {}\n", name.to_str().unwrap()));
+            result += &format!("  ↳  {}\n", name);
         }
     }
 
